@@ -133,7 +133,6 @@ void main()
     // Calculate conversion factor
     device.tension_conv_factor = ((0.25 * 101.0 * 1000) / 1638.4); //derives from datasheet calculations
     device.tension_valid = FALSE;
-    device.pwm_limit = 0;
 
     calibration_flag = STOP;
 
@@ -148,7 +147,7 @@ void main()
         // Call function scheduler
         function_scheduler();
 
-        //  Wait until the FF is set to 1
+        // Wait until the FF is set to 1
         while(FF_STATUS_Read() == 0);
 
         // Command a FF reset

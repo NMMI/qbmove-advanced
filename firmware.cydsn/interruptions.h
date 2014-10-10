@@ -31,8 +31,6 @@ void motor_control(void);
 
 void calibration(void);
 
-void pwm_limit_search();
-
 // ----------------------------------------------------------------------------
 #endif
 

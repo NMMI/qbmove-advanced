@@ -27,7 +27,7 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBMMP v4.1.1"
+#define VERSION         "QBMA v1.0.0"
 
 #define NUM_OF_MOTORS   2
 #define NUM_OF_SENSORS  3
@@ -140,7 +140,6 @@ struct st_dev{
     int32   tension;                // Power supply tension
     float   tension_conv_factor;    // Used to calculate input tension
     uint8   tension_valid;
-    uint8   pwm_limit;
 };
 
 

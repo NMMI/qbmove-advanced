@@ -24,43 +24,6 @@
 
 uint8 timer_flag = 0;
 
-static const uint8 pwm_preload_values[36] = {100,   //0 (8000)
-                                            76,
-                                            71,
-                                            69,
-                                            67,
-                                            65,     //5 (10500)
-                                            63,
-                                            61,
-                                            60,
-                                            58,
-                                            57,     //10 (13000)
-                                            56,
-                                            55,
-                                            54,
-                                            53,
-                                            52,     //15 (15500)
-                                            51,
-                                            50,
-                                            49,
-                                            49,
-                                            48,     //20 (18000)
-                                            47,
-                                            47,
-                                            46,
-                                            45,
-                                            45,     //25 (20500)
-                                            45,
-                                            44,
-                                            44,
-                                            43,
-                                            43,     //30 (23000)
-                                            43,
-                                            43,
-                                            42,
-                                            42,
-                                            42};    //35 (25500)
-
 //==============================================================================
 //                                                            RS485 RX INTERRUPT
 //==============================================================================
@@ -396,11 +359,6 @@ void motor_control(void)
     MOTOR_DIR_Write((input_1 >= 0) + ((input_2 >= 0) << 1));
     //MOTOR_DIR_Write((input_1 < 0) + ((input_2 < 0) << 1));
 
-    if (c_mem.control_mode != CONTROL_PWM) {
-        input_1 = (((input_1 * 1024) / PWM_MAX_VALUE) * device.pwm_limit) / 1024;
-        input_2 = (((input_2 * 1024) / PWM_MAX_VALUE) * device.pwm_limit) / 1024;
-    }
-
     PWM_MOTORS_WriteCompare1(abs(input_1));
     PWM_MOTORS_WriteCompare2(abs(input_2));
 
@@ -442,7 +400,6 @@ void analog_measurements(void)
                     device.tension_valid = FALSE;
                 } else {
                     device.tension_valid = TRUE;
-                    pwm_limit_search();
                 }
                 break;
 
@@ -702,24 +659,5 @@ void calibration()
             break;
     }
 }
-
-
-//==============================================================================
-//                                                              PWM_LIMIT_SEARCH
-//==============================================================================
-
-void pwm_limit_search() {
-    uint8 index;
-
-    if (device.tension > 25500) {
-        device.pwm_limit = 0;
-    } else if (device.tension < 8000) {
-        device.pwm_limit = 100;
-    } else {
-        index = (uint8)((device.tension - 8000) / 500);
-        device.pwm_limit = pwm_preload_values[index];
-    }
-}
-
 
 /* [] END OF FILE */

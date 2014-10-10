@@ -559,9 +559,6 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string,str);
     sprintf(str,"Number of sensors: %d\r\n",(int) NUM_OF_SENSORS);        
     strcat(info_string,str);
-    sprintf(str,"PWM Limit: %d\r\n",(int) device.pwm_limit);        
-    strcat(info_string,str);
-    strcat(info_string,"\r\n");
 
     strcat(info_string, "MOTOR INFO\r\n");
     strcat(info_string, "Motor references: ");
@@ -849,7 +846,7 @@ void memInit(void)
     uint8 i;
     //initialize memory settings
     g_mem.id            =   1;
-    g_mem.k_p           =   0.1 * 65536;
+    g_mem.k_p           =   0.1 * 65536;   //XXXXXXXXX
     g_mem.k_i           =   0 * 65536;
     g_mem.k_d           =   0.8 * 65536;
     g_mem.activ         =   0;
@@ -859,14 +856,14 @@ void memInit(void)
     g_mem.pos_lim_flag = 1;
 
     for (i = 0; i < NUM_OF_MOTORS; i++) {
-        g_mem.pos_lim_inf[i] = -30000;
-        g_mem.pos_lim_sup[i] =  30000;
+        g_mem.pos_lim_inf[i] = -327280;  //10 turns limit
+        g_mem.pos_lim_sup[i] =  327270;
     }  
  
     for(i = 0; i < NUM_OF_SENSORS; ++i)
     {
         g_mem.m_mult[i] = 1;
-        g_mem.res[i] = 1;
+        g_mem.res[i] = 8;
     }
     
     g_mem.m_off[0] = (int32)0 << g_mem.res[0];
@@ -876,7 +873,7 @@ void memInit(void)
     g_mem.max_step_pos = 0;
     g_mem.max_step_neg = 0;
 
-    g_mem.max_stiffness = (int32)3000 << g_mem.res[0];
+    g_mem.max_stiffness = (int32)0 << g_mem.res[0]; //XXX
  
     //set the initialized flag to show EEPROM has been populated
     g_mem.flag = TRUE;
