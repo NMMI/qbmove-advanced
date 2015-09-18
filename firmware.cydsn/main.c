@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 
 
-/** 
+/**
 * \file         main.c
 *
 * \brief        Firmware main file.
@@ -39,7 +39,7 @@
 #include <device.h>
 #include <globals.h> // ALL GLOBAL DEFINITIONS, STRUCTURES AND MACROS HERE
 #include <interruptions.h>
-#include <command_processing.h> 
+#include <command_processing.h>
 
 //==============================================================================
 //                                                                 MAIN FUNCTION
@@ -48,10 +48,10 @@
 int i;          //iterator
 
 
-void main()
-{
-//====================================     initializations - psoc and components
-    
+void main() {
+
+    //================================     initializations - psoc and components
+
     // EEPROM
 
     EEPROM_Start();
@@ -73,7 +73,7 @@ void main()
     UART_RS485_ClearRxBuffer();
     UART_RS485_ClearTxBuffer();
 
-    ISR_RS485_RX_StartEx(ISR_RS485_RX_ExInterrupt);     // RS485 isr function    
+    ISR_RS485_RX_StartEx(ISR_RS485_RX_ExInterrupt);     // RS485 isr function
 
 
     // PWM
@@ -92,52 +92,61 @@ void main()
     SHIFTREG_ENC_2_Start();
     SHIFTREG_ENC_3_Start();
     #if NUM_OF_SENSORS == 4
-        SHIFTREG_ENC_4_Start(); 
+        SHIFTREG_ENC_4_Start();
     #endif
 
 
-    // ADC + MUX
+    // ADC
 
-    ADC_Start();                                     // start ADC
+    ADC_Start();                                        // start ADC
     ADC_StartConvert();
-    AMUXSEQ_MOTORS_Start();                              // start mux
 
 
     RS485_CTS_Write(0);
 
+    // Timers
+
     MY_TIMER_Start();
     PACER_TIMER_Start();
 
-    CYGlobalIntEnable;                                  // enable interrupts        
+    RS485_CTS_Write(0);
 
-//========================================     initializations - clean variables
+    CYGlobalIntEnable;                                  // enable interrupts
 
+
+    //====================================     initializations - clean variables
+
+    // Wait for encoders to have a valid value
+    RESET_COUNTERS_Write(0x00);
+    CyDelay(10);
 
     for (i = 0; i < NUM_OF_MOTORS; i++) {
-        g_ref.pos[i] = 0;   
+        g_ref.pos[i] = 0;
     }
 
     for (i = 0; i < NUM_OF_SENSORS; i++) {
         g_meas.pos[i] = 0;
-        g_meas.rot[i] = 0;  
+        g_meas.rot[i] = 0;
     }
 
     g_ref.onoff = c_mem.activ;
 
-    g_rx.length         = 0;
-    g_rx.ready          = 0;
-    
+    g_rx.length = 0;
+    g_rx.ready  = 0;
+
     // Activating motors
     MOTOR_ON_OFF_Write(g_ref.onoff);
 
     // Calculate conversion factor
     device.tension_conv_factor = ((0.25 * 101.0 * 1000) / 1638.4); //derives from datasheet calculations
     device.tension_valid = FALSE;
+    device.pwm_limit = 0;
 
     calibration_flag = STOP;
+    reset_last_value_flag = 0;
 
 
-//=========================================================     application loop
+    //============================================================     main loop
 
     for(;;)
     {
@@ -147,7 +156,7 @@ void main()
         // Call function scheduler
         function_scheduler();
 
-        // Wait until the FF is set to 1
+        //  Wait until the FF is set to 1
         while(FF_STATUS_Read() == 0);
 
         // Command a FF reset
@@ -160,7 +169,6 @@ void main()
             UART_RS485_ClearRxBuffer();
     }
 }
-
 
 
 /* [] END OF FILE */
