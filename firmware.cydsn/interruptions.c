@@ -644,8 +644,11 @@ void encoder_reading(uint8 index)
         //value_encoder = -value_encoder;
 
         //Add offset and crop to 16bit
-        value_encoder  = (int16)(value_encoder + g_mem.m_off[index]);
-
+        if(index !=2)
+            value_encoder = (int16)(value_encoder + g_mem.m_off[index]);
+        else
+            value_encoder = -(int16)(value_encoder + g_mem.m_off[index]);
+            
         // Initialize last_value_encoder
         if (only_first_time) {
             last_value_encoder[index] = value_encoder;

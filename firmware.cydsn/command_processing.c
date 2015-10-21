@@ -401,9 +401,14 @@ void paramSet(uint16 param_type)
         case PARAM_MEASUREMENT_OFFSET:
             for(i = 0; i < NUM_OF_SENSORS; ++i)
             {
-                g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
-                g_mem.m_off[i] = g_mem.m_off[i] << g_mem.res[i];
-
+                if(i == 2) {
+                    g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
+                    g_mem.m_off[i] = -g_mem.m_off[i] << g_mem.res[i];
+                }
+                else {
+                    g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
+                    g_mem.m_off[i] = g_mem.m_off[i] << g_mem.res[i];
+                }
                 g_meas.rot[i] = 0;
             }
             reset_last_value_flag = 1;
