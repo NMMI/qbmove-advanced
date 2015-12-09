@@ -516,7 +516,10 @@ void paramGet(uint16 param_type)
         case PARAM_MEASUREMENT_OFFSET:
             for(i = 0; i < NUM_OF_SENSORS; ++i)
             {
-                *((int16 *) ( packet_data + 1 + (i * 2) )) = (int16) (c_mem.m_off[i] >> c_mem.res[i]);
+                if(i == 2)
+                    *((int16 *) ( packet_data + 1 + (i * 2) )) = (int16) -(c_mem.m_off[i] >> c_mem.res[i]);
+                else
+                    *((int16 *) ( packet_data + 1 + (i * 2) )) = (int16) (c_mem.m_off[i] >> c_mem.res[i]);
 
             }
 
