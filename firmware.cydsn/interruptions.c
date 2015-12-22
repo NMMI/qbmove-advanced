@@ -538,8 +538,10 @@ void analog_read_end(uint8 index) {
                 //until there is no valid input tension repeat this measurement
                 if (device.tension < 0)
                     device.tension_valid = FALSE;
-                else
+                else {
                     device.tension_valid = TRUE;
+                    pwm_limit_search();
+                }
                 break;
 
             // --- Current motor 1 ---
@@ -774,7 +776,6 @@ void calibration()
 
             if (pause_counter == 10) {
                 pause_counter =0;
-
                 calibration_flag = CONTINUE_2;
             }
             break;
