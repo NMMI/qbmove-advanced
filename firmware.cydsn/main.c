@@ -120,9 +120,8 @@ void main() {
     RESET_COUNTERS_Write(0x00);
     CyDelay(10);
 
-    for (i = 0; i < NUM_OF_MOTORS; i++) {
+    for (i = 0; i < NUM_OF_MOTORS; i++)
         g_ref.pos[i] = 0;
-    }
 
     for (i = 0; i < NUM_OF_SENSORS; i++) {
         g_meas.pos[i] = 0;

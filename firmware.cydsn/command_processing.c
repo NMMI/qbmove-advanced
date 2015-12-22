@@ -49,8 +49,7 @@ void commProcess(void){
 //==========================================================     verify checksum
     aux_checksum = LCRChecksum(g_rx.buffer,
         g_rx.length - 1);
-    if (!(aux_checksum ==
-    g_rx.buffer[g_rx.length-1])){
+    if (!(aux_checksum == g_rx.buffer[g_rx.length-1])) {
         // wrong checksum
         g_rx.ready = 0;
         return;
@@ -80,11 +79,15 @@ void commProcess(void){
             g_ref.pos[1] = g_ref.pos[1] << g_mem.res[1];
 
             if (c_mem.pos_lim_flag) {                      // pos limiting
-                if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) g_ref.pos[0] = c_mem.pos_lim_inf[0];
-                if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) g_ref.pos[1] = c_mem.pos_lim_inf[1];
+                if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) 
+                    g_ref.pos[0] = c_mem.pos_lim_inf[0];
+                if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) 
+                    g_ref.pos[1] = c_mem.pos_lim_inf[1];
 
-                if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) g_ref.pos[0] = c_mem.pos_lim_sup[0];
-                if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) g_ref.pos[1] = c_mem.pos_lim_sup[1];
+                if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) 
+                    g_ref.pos[0] = c_mem.pos_lim_sup[0];
+                if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) 
+                    g_ref.pos[1] = c_mem.pos_lim_sup[1];
             }
 
             break;
@@ -123,13 +126,10 @@ void commProcess(void){
 
             packet_data[0] = CMD_GET_MEASUREMENTS;   //header
 
-            for (i = 0; i < NUM_OF_SENSORS; i++) {
-                *((int16 *) &packet_data[(i*2) + 1]) = (int16)
-                (g_meas.pos[i] >> g_mem.res[i]);
-            }
+            for (i = 0; i < NUM_OF_SENSORS; i++)
+                *((int16 *) &packet_data[(i*2) + 1]) = (int16) (g_meas.pos[i] >> g_mem.res[i]);
 
-            packet_data[packet_lenght - 1] =
-                    LCRChecksum (packet_data,packet_lenght - 1);
+            packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
 
@@ -170,8 +170,7 @@ void commProcess(void){
                 (g_meas.pos[i] >> g_mem.res[i]);
             }
 
-            packet_data[packet_lenght - 1] =
-                LCRChecksum (packet_data,packet_lenght - 1);
+            packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
             //commWrite(packet_data, packet_lenght);
             commWrite(packet_data, packet_lenght);
@@ -185,9 +184,8 @@ void commProcess(void){
 
             packet_data[0] = CMD_GET_VELOCITIES;   //header
 
-            for (i = 0; i < NUM_OF_SENSORS; i++) {
+            for (i = 0; i < NUM_OF_SENSORS; i++)
                 *((int16 *) &packet_data[(i*2) + 1]) = (int16)(g_meas.vel[i]);
-            }
 
             packet_data[packet_lenght - 1] =
                     LCRChecksum (packet_data,packet_lenght - 1);
@@ -213,8 +211,8 @@ void commProcess(void){
         case CMD_GET_INPUTS:
             packet_lenght = 6;
 
-            *((int16 *) &packet_data[1]) = (int16) (g_ref.pos[0]  >> g_mem.res[0]);
-            *((int16 *) &packet_data[3]) = (int16) (g_ref.pos[1]  >> g_mem.res[1]);
+            *((int16 *) &packet_data[1]) = (int16) (g_ref.pos[0] >> g_mem.res[0]);
+            *((int16 *) &packet_data[3]) = (int16) (g_ref.pos[1] >> g_mem.res[1]);
             packet_data[5] = LCRChecksum(packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
@@ -222,17 +220,17 @@ void commProcess(void){
 
 //=============================================================     CMD_GET_INFO
         case CMD_GET_INFO:
-            infoGet( *((uint16 *) &g_rx.buffer[1]));
+            infoGet(*((uint16 *) &g_rx.buffer[1]));
             break;
 
 //============================================================     CMD_SET_PARAM
         case CMD_SET_PARAM:
-            paramSet( *((uint16 *) &g_rx.buffer[1]) );
+            paramSet(*((uint16 *) &g_rx.buffer[1]));
             break;
 
 //============================================================     CMD_GET_PARAM
         case CMD_GET_PARAM:
-            paramGet( *((uint16 *) &g_rx.buffer[1]) );
+            paramGet(*((uint16 *) &g_rx.buffer[1]));
             break;
 
 //=================================================================     CMD_PING
@@ -271,40 +269,36 @@ void commProcess(void){
                 }
             }
 
-            if ( memStore(0) ) {
+            if ( memStore(0) )
                 sendAcknowledgment(ACK_OK);
-            } else {
+            else
                 sendAcknowledgment(ACK_ERROR);
-            }
             break;
 
 //=================================================     CMD_STORE_DEFAULT_PARAMS
         case CMD_STORE_DEFAULT_PARAMS:
-            if ( memStore(DEFAULT_EEPROM_DISPLACEMENT) ) {
+            if (memStore(DEFAULT_EEPROM_DISPLACEMENT))
                 sendAcknowledgment(ACK_OK);
-            } else {
+            else
                 sendAcknowledgment(ACK_ERROR);
-            }
             break;
 
 //=======================================================     CMD_RESTORE_PARAMS
 
         case CMD_RESTORE_PARAMS:
-            if ( memRestore() ) {
+            if (memRestore())
                 sendAcknowledgment(ACK_OK);
-            } else {
+            else
                 sendAcknowledgment(ACK_ERROR);
-            }
             break;
 
 //=============================================================     CMD_INIT_MEM
 
         case CMD_INIT_MEM:
-            if ( memInit() ) {
+            if (memInit())
                 sendAcknowledgment(ACK_OK);
-            } else {
+            else
                 sendAcknowledgment(ACK_ERROR);
-            }
             break;
 
 //===========================================================     CMD_BOOTLOADER
@@ -392,9 +386,8 @@ void paramSet(uint16 param_type)
 
         //---------------------------------------------------     Set Resolution
         case PARAM_POS_RESOLUTION:
-            for (i =0; i < NUM_OF_SENSORS; i++) {
+            for (i =0; i < NUM_OF_SENSORS; i++)
                 g_mem.res[i] = g_rx.buffer[i+3];
-            }
             break;
 
         //------------------------------------------------------     Set Offsets
@@ -417,10 +410,7 @@ void paramSet(uint16 param_type)
         //--------------------------------------------------     Set Multipliers
         case PARAM_MEASUREMENT_MULTIPLIER:
             for(i = 0; i < NUM_OF_SENSORS; ++i)
-            {
-                g_mem.m_mult[i] =
-                    *((double *) &g_rx.buffer[3 + i * 4]);
-            }
+                g_mem.m_mult[i] = *((double *) &g_rx.buffer[3 + i * 4]);
             break;
 
         //------------------------------------------     Set Position Limit Flag
@@ -506,9 +496,8 @@ void paramGet(uint16 param_type)
 
         //---------------------------------------------------     Get Resolution
         case PARAM_POS_RESOLUTION:
-            for (i = 0; i < NUM_OF_SENSORS; i++) {
+            for (i = 0; i < NUM_OF_SENSORS; i++)
                 packet_data[i+1] = c_mem.res[i];
-            }
             packet_lenght = NUM_OF_SENSORS + 2;
             break;
 
@@ -529,11 +518,7 @@ void paramGet(uint16 param_type)
         //--------------------------------------------------     Get Multipliers
         case PARAM_MEASUREMENT_MULTIPLIER:
             for(i = 0; i < NUM_OF_SENSORS; ++i)
-            {
-                *((double *) ( packet_data + 1 + (i * 4) )) =
-                    c_mem.m_mult[i];
-            }
-
+                *((double *) ( packet_data + 1 + (i * 4) )) = c_mem.m_mult[i];
             packet_lenght = 2 + NUM_OF_SENSORS * 4;
             break;
 
@@ -546,10 +531,8 @@ void paramGet(uint16 param_type)
         //-----------------------------------------------     Get Position Limit
         case PARAM_POS_LIMIT:
             for (i = 0; i < NUM_OF_MOTORS; i++) {
-                *((int32 *)( packet_data + 1 + (i * 2 * 4) )) =
-                    c_mem.pos_lim_inf[i];
-                *((int32 *)( packet_data + 1 + (i * 2 * 4) + 4)) =
-                    c_mem.pos_lim_sup[i];
+                *((int32 *)( packet_data + 1 + (i * 2 * 4) )) = c_mem.pos_lim_inf[i];
+                *((int32 *)( packet_data + 1 + (i * 2 * 4) + 4)) = c_mem.pos_lim_sup[i];
             }
             packet_lenght = 2 + (NUM_OF_MOTORS * 2 * 4);
             break;
@@ -600,31 +583,29 @@ void infoPrepare(unsigned char *info_string)
 
 
     sprintf(str, "Motor enabled: ");
-    if (g_ref.onoff & 0x03) {
+    if (g_ref.onoff & 0x03)
         strcat(str,"YES\r\n");
-    } else {
+    else
         strcat(str,"NO\r\n");
-    }
     strcat(info_string, str);
 
 
     strcat(info_string,"\r\nMEASUREMENTS INFO\r\n");
     strcat(info_string, "Sensor value:\r\n");
     for (i = 0; i < NUM_OF_SENSORS; i++) {
-        sprintf(str,"%d -> %d", i+1,
-            (int)(g_meas.pos[i] >> c_mem.res[i]));
+        sprintf(str,"%d -> %d", i+1, (int)(g_meas.pos[i] >> c_mem.res[i]));
         strcat(info_string, str);
         strcat(info_string, "\r\n");
     }
-    sprintf(str,"Voltage (mV): %ld", (int32) device.tension );
+    sprintf(str,"Voltage (mV): %ld", (int32) device.tension);
     strcat(info_string, str);
     strcat(info_string,"\r\n");
 
-    sprintf(str,"Current 1 (mA): %ld", (int32) g_meas.curr[0] );
+    sprintf(str,"Current 1 (mA): %ld", (int32) g_meas.curr[0]);
     strcat(info_string, str);
     strcat(info_string,"\r\n");
 
-    sprintf(str,"Current 2 (mA): %ld", (int32) g_meas.curr[1] );
+    sprintf(str,"Current 2 (mA): %ld", (int32) g_meas.curr[1]);
     strcat(info_string, str);
     strcat(info_string,"\r\n");
 
@@ -649,11 +630,10 @@ void infoPrepare(unsigned char *info_string)
 
     strcat(info_string,"\r\n");
 
-    if (c_mem.activ == 0x03) {
+    if (c_mem.activ == 0x03)
         strcat(info_string, "Startup activation: YES\r\n");
-    } else {
+    else
         strcat(info_string, "Startup activation: NO\r\n");
-    }
 
     switch(c_mem.input_mode) {
         case 0:
@@ -685,8 +665,7 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string, "Sensor resolution:\r\n");
     for(i = 0; i < NUM_OF_SENSORS; ++i)
     {
-        sprintf(str,"%d -> %d", (int) (i + 1),
-            (int) c_mem.res[i]);
+        sprintf(str,"%d -> %d", (int) (i + 1), (int) c_mem.res[i]);
         strcat(info_string, str);
         strcat(info_string,"\r\n");
     }
@@ -695,8 +674,7 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string, "Measurement Offset:\r\n");
     for(i = 0; i < NUM_OF_SENSORS; ++i)
     {
-        sprintf(str,"%d -> %ld", (int) (i + 1),
-            (int32) c_mem.m_off[i] >> c_mem.res[i]);
+        sprintf(str,"%d -> %ld", (int) (i + 1), (int32) c_mem.m_off[i] >> c_mem.res[i]);
         strcat(info_string, str);
         strcat(info_string,"\r\n");
     }
@@ -704,8 +682,7 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string, "Measurement Multiplier:\r\n");
     for(i = 0; i < NUM_OF_SENSORS; ++i)
     {
-        sprintf(str,"%d -> %f", (int)(i + 1),
-            (double) c_mem.m_mult[i]);
+        sprintf(str,"%d -> %f", (int)(i + 1), (double) c_mem.m_mult[i]);
         strcat(info_string, str);
         strcat(info_string,"\r\n");
     }
@@ -715,12 +692,10 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string,"\r\n");
 
     for (i = 0; i < NUM_OF_MOTORS; i++) {
-        sprintf(str, "Position limit motor %d: inf -> %ld  ", (int)(i + 1),
-                (int32)g_mem.pos_lim_inf[i] >> g_mem.res[i]);
+        sprintf(str, "Position limit motor %d: inf -> %ld  ", (int)(i + 1), (int32)g_mem.pos_lim_inf[i] >> g_mem.res[i]);
         strcat(info_string, str);
 
-        sprintf(str, "sup -> %ld\r\n",
-                (int32)g_mem.pos_lim_sup[i] >> g_mem.res[i]);
+        sprintf(str, "sup -> %ld\r\n", (int32)g_mem.pos_lim_sup[i] >> g_mem.res[i]);
         strcat(info_string, str);
     }
 
@@ -754,9 +729,7 @@ void commWrite(uint8 *packet_data, uint16 packet_lenght)
     UART_RS485_PutChar((uint8)packet_lenght);
     // frame - packet data
     for(i = 0; i < packet_lenght; ++i)
-    {
         UART_RS485_PutChar(packet_data[i]);
-    }
 
     i = 0;
 
@@ -834,16 +807,14 @@ void memRecall(void) {
 
     uint16 i;
 
-    for (i = 0; i < sizeof(g_mem); i++) {
+    for (i = 0; i < sizeof(g_mem); i++)
         ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i];
-    }
 
     //check for initialization
-    if (g_mem.flag == FALSE) {
+    if (g_mem.flag == FALSE)
         memRestore();
-    } else {
+    else
         memcpy( &c_mem, &g_mem, sizeof(g_mem) );
-    }
 }
 
 
@@ -859,16 +830,14 @@ uint8 memRestore(void) {
 
     uint16 i;
 
-    for (i = 0; i < sizeof(g_mem); i++) {
+    for (i = 0; i < sizeof(g_mem); i++)
         ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i + (DEFAULT_EEPROM_DISPLACEMENT * 16)];
-    }
 
     //check for initialization
-    if (g_mem.flag == FALSE) {
+    if (g_mem.flag == FALSE)
         return memInit();
-    } else {
+    else
         return memStore(0);
-    }
 }
 
 //==============================================================================

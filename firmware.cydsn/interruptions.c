@@ -79,11 +79,10 @@ CY_ISR(ISR_RS485_RX_ExInterrupt) {
             case  1:
 
                 // packet is for my ID or is broadcast
-                if (rx_data == c_mem.id || rx_data == 0) {
+                if (rx_data == c_mem.id || rx_data == 0)
                     rx_data_type = 0;
-                } else {                //packet is for others
+                else                //packet is for others
                     rx_data_type = 1;
-                }
                 data_packet.length = -1;
                 state = 2;
                 break;
@@ -216,8 +215,10 @@ void motor_control(uint8 index) {
 
         // position limit
         if (c_mem.pos_lim_flag) {
-            if (g_ref.pos[index] < c_mem.pos_lim_inf[index]) g_ref.pos[index] = c_mem.pos_lim_inf[index];
-            if (g_ref.pos[index] > c_mem.pos_lim_sup[index]) g_ref.pos[index] = c_mem.pos_lim_sup[index];
+            if (g_ref.pos[index] < c_mem.pos_lim_inf[index]) 
+                g_ref.pos[index] = c_mem.pos_lim_inf[index];
+            if (g_ref.pos[index] > c_mem.pos_lim_sup[index]) 
+                g_ref.pos[index] = c_mem.pos_lim_sup[index];
         }
     }
 
@@ -241,41 +242,36 @@ void motor_control(uint8 index) {
 
             // Proportional
             if (c_mem.k_p != 0) {
-                if ((pos_error > 131072) || (pos_error < -131072)) {  //if grater than 2^17
+                if ((pos_error > 131072) || (pos_error < -131072)) //if grater than 2^17
                     pwm_input += (int32)(c_mem.k_p * (pos_error >> 8)) >> 8;
-                } else {
+                else
                     pwm_input += (int32)(c_mem.k_p * pos_error) >> 16;
-                }
             }
 
             // Integral
-            if (c_mem.k_i != 0) {
+            if (c_mem.k_i != 0)
                 pwm_input += (int32)((c_mem.k_i >> 6) * pos_error_sum[index]) >> 10;
-            }
 
             // Derivative
-            if (c_mem.k_d != 0) {
+            if (c_mem.k_d != 0)
                 pwm_input += (int32)(c_mem.k_d * (prev_pos[index] - g_meas.pos[index])) >> 16;
-            }
 
             // Update measure
             prev_pos[index] = g_meas.pos[index];
 
             switch(index) {
                 case 0:
-                    if (pwm_input >= 0) {
+                    if (pwm_input >= 0)
                         direction = direction | 0x01;
-                    } else {
+                    else
                         direction = direction & 0xFE;
-                    }
                     break;
 
                 case 1:
-                    if (pwm_input >= 0) {
+                    if (pwm_input >= 0)
                         direction = direction | 0x02;
-                    } else {
+                    else
                         direction = direction & 0xFD;
-                    }
                     break;
 
                 default:
@@ -293,39 +289,34 @@ void motor_control(uint8 index) {
 
             // Proportional
             if (c_mem.k_p != 0) {
-                if ((pos_error > 131072) || (pos_error < -131072)) {
+                if ((pos_error > 131072) || (pos_error < -131072))
                     curr_ref += (int32)(c_mem.k_p * (pos_error >> 8)) >> 8;
-                } else {
+                else
                     curr_ref += (int32)(c_mem.k_p * pos_error) >> 16;
-                }
             }
 
             // Integral
-            if (c_mem.k_i != 0) {
+            if (c_mem.k_i != 0)
                 curr_ref += (int32)(c_mem.k_i * pos_error_sum[index]) >> 16;
-            }
 
             // Derivative
-            if (c_mem.k_d != 0) {
+            if (c_mem.k_d != 0)
                 curr_ref += (int32)(c_mem.k_d * (prev_pos[index] - g_meas.pos[index])) >> 16;
-            }
 
             // motor direction depends on curr_ref
             switch(index) {
                 case 0:
-                    if (curr_ref >= 0) {
+                    if (curr_ref >= 0)
                         direction = direction | 0x01;
-                    } else {
+                    else
                         direction = direction & 0xFE;
-                    }
                     break;
 
                 case 1:
-                    if (curr_ref >= 0) {
+                    if (curr_ref >= 0)
                         direction = direction | 0x02;
-                    } else {
+                    else
                         direction = direction & 0xFD;
-                    }
                     break;
 
                 default:
@@ -336,9 +327,8 @@ void motor_control(uint8 index) {
             curr_ref = abs(curr_ref);
 
             // saturate max current
-            if (curr_ref > c_mem.current_limit) {
+            if (curr_ref > c_mem.current_limit)
                 curr_ref = c_mem.current_limit;
-            }
 
             // current error
             curr_error = curr_ref - g_meas.curr[index];
@@ -349,19 +339,16 @@ void motor_control(uint8 index) {
             pwm_input = 0;
 
             // Proportional
-            if (c_mem.k_p_c != 0) {
+            if (c_mem.k_p_c != 0)
                 pwm_input += (int32)(c_mem.k_p_c * curr_error) >> 16;
-            }
 
             // Integral
-            if (c_mem.k_i_c != 0) {
+            if (c_mem.k_i_c != 0)
                 pwm_input += (int32)(c_mem.k_i_c * curr_error_sum[index]) >> 16;
-            }
 
             // Derivative
-            if (c_mem.k_d_c != 0) {
+            if (c_mem.k_d_c != 0)
                 pwm_input += (int32)(c_mem.k_d_c * (prev_curr[index] - g_meas.curr[index])) >> 16;
-            }
 
             // pwm_input saturation
             if (pwm_input < 0) {
@@ -401,9 +388,8 @@ void motor_control(uint8 index) {
             curr_ref = g_ref.pos[index] >> g_mem.res[index];
 
             // saturate max current
-            if (curr_ref > c_mem.current_limit) {
+            if (curr_ref > c_mem.current_limit)
                 curr_ref = c_mem.current_limit;
-            }
 
             // Current error
             curr_error = abs(curr_ref) - g_meas.curr[index];
@@ -422,19 +408,16 @@ void motor_control(uint8 index) {
             pwm_input = 0;
 
             // Proportional
-            if (c_mem.k_p_c != 0) {
+            if (c_mem.k_p_c != 0)
                 pwm_input += (int32)(c_mem.k_p_c * curr_error) >> 16;
-            }
 
             // Integral
-            if (c_mem.k_i_c != 0) {
+            if (c_mem.k_i_c != 0)
                 pwm_input += (int32)(c_mem.k_i_c * (curr_error_sum[index] >> 6)) >> 10;
-            }
 
             // Derivative
-            if (c_mem.k_d_c != 0) {
+            if (c_mem.k_d_c != 0)
                 pwm_input += (int32)(c_mem.k_d_c * (prev_curr[index] - g_meas.curr[index])) >> 16;
-            }
 
             // Saturate pwm_input
             if (pwm_input < 0)
@@ -445,19 +428,17 @@ void motor_control(uint8 index) {
 
             switch(index) {
                 case 0:
-                    if (curr_ref >= 0) {
+                    if (curr_ref >= 0)
                         direction = direction | 0x01;
-                    } else {
+                    else
                         direction = direction & 0xFE;
-                    }
                     break;
 
                 case 1:
-                    if (curr_ref >= 0) {
+                    if (curr_ref >= 0)
                         direction = direction | 0x02;
-                    } else {
+                    else
                         direction = direction & 0xFD;
-                    }
                     break;
 
                 default:
@@ -472,19 +453,17 @@ void motor_control(uint8 index) {
 
             switch(index) {
                 case 0:
-                    if (pwm_input >= 0) {
+                    if (pwm_input >= 0)
                         direction = direction | 0x01;
-                    } else {
+                    else
                         direction = direction & 0xFE;
-                    }
                     break;
 
                 case 1:
-                    if (pwm_input >= 0) {
+                    if (pwm_input >= 0)
                         direction = direction | 0x02;
-                    } else {
+                    else
                         direction = direction & 0xFD;
-                    }
                     break;
 
                 default:
@@ -502,9 +481,8 @@ void motor_control(uint8 index) {
     if(pwm_input < -PWM_MAX_VALUE) pwm_input = -PWM_MAX_VALUE;
 
     // remap pwm_input on pwm_limit based on input tension to have maximum 8 volts
-    if (c_mem.control_mode != CONTROL_PWM) {
+    if (c_mem.control_mode != CONTROL_PWM)
         pwm_input = (((pwm_input << 10) / PWM_MAX_VALUE) * device.pwm_limit) >> 10;
-    }
 
     // drive direction and pwm duty cylce
     MOTOR_DIR_Write(direction);
@@ -558,30 +536,26 @@ void analog_read_end(uint8 index) {
             case 0:
                 device.tension = value * device.tension_conv_factor;
                 //until there is no valid input tension repeat this measurement
-                if (device.tension < 0) {
+                if (device.tension < 0)
                     device.tension_valid = FALSE;
-                } else {
+                else
                     device.tension_valid = TRUE;
-                    pwm_limit_search();
-                }
                 break;
 
             // --- Current motor 1 ---
             case 1:
-                if (device.tension_valid) {
+                if (device.tension_valid)
                     g_meas.curr[0] =  filter_i1(abs((value * 39) >> 4));
-                } else {
+                else
                     g_meas.curr[0] = 0;
-                }
                 break;
 
             // --- Current motor 2 ---
             case 2:
-                if (device.tension_valid) {
+                if (device.tension_valid)
                     g_meas.curr[1] =  filter_i2(abs((value * 39) >> 4));
-                } else {
+                else
                     g_meas.curr[1] = 0;
-                }
                 break;
         }
     }
@@ -641,8 +615,6 @@ void encoder_reading(uint8 index)
 
         value_encoder = (aux - 0x20000) >> 2;
 
-        //value_encoder = -value_encoder;
-
         //Add offset and crop to 16bit
         if(index !=2)
             value_encoder = (int16)(value_encoder + g_mem.m_off[index]);
@@ -697,9 +669,8 @@ void encoder_reading(uint8 index)
 
         value_encoder += (int32)g_meas.rot[index] << 16;
 
-        if (c_mem.m_mult[index] != 1.0) {
+        if (c_mem.m_mult[index] != 1.0)
             value_encoder *= c_mem.m_mult[index];
-        }
 
         g_meas.pos[index] = value_encoder;
     }
@@ -752,9 +723,8 @@ void calibration()
             g_ref.pos[1] = 0;
 
             // Activate motors
-            if (!(g_ref.onoff & 0x03)) {
+            if (!(g_ref.onoff & 0x03))
                 MOTOR_ON_OFF_Write(0x03);
-            }
 
             // wait for motors to reach zero position
             calibration_flag = PAUSE_1;
@@ -811,9 +781,8 @@ void calibration()
 
         case CONTINUE_2:
             // Deactivate motors
-            if (!(g_ref.onoff & 0x03)) {
+            if (!(g_ref.onoff & 0x03))
                 MOTOR_ON_OFF_Write(0x00);
-            }
 
             // store memory to save MAX_STIFFNESS as default value
             memStore(DEFAULT_EEPROM_DISPLACEMENT);
