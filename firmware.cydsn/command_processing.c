@@ -674,7 +674,10 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string, "Measurement Offset:\r\n");
     for(i = 0; i < NUM_OF_SENSORS; ++i)
     {
-        sprintf(str,"%d -> %ld", (int) (i + 1), (int32) c_mem.m_off[i] >> c_mem.res[i]);
+        if(i == 2)
+            sprintf(str,"%d -> %ld", (int) (i + 1), (int32) -c_mem.m_off[i] >> c_mem.res[i]);
+        else
+            sprintf(str,"%d -> %ld", (int) (i + 1), (int32) c_mem.m_off[i] >> c_mem.res[i]);
         strcat(info_string, str);
         strcat(info_string,"\r\n");
     }
