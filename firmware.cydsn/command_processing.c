@@ -73,10 +73,10 @@ void commProcess(void){
 
         case CMD_SET_INPUTS:
             g_ref.pos[0] = *((int16 *) &g_rx.buffer[1]);   // motor 1
-            g_ref.pos[0] = g_ref.pos[0] << g_mem.res[0];
+            g_ref.pos[0] = -(g_ref.pos[0] << g_mem.res[0]);
 
             g_ref.pos[1] = *((int16 *) &g_rx.buffer[3]);   // motor 2
-            g_ref.pos[1] = g_ref.pos[1] << g_mem.res[1];
+            g_ref.pos[1] = -(g_ref.pos[1] << g_mem.res[1]);
 
             if (c_mem.pos_lim_flag) {                      // pos limiting
                 if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) 
@@ -127,7 +127,7 @@ void commProcess(void){
             packet_data[0] = CMD_GET_MEASUREMENTS;   //header
 
             for (i = 0; i < NUM_OF_SENSORS; i++)
-                *((int16 *) &packet_data[(i*2) + 1]) = (int16) (g_meas.pos[i] >> g_mem.res[i]);
+                *((int16 *) &packet_data[(i*2) + 1]) = (int16) -(g_meas.pos[i] >> g_mem.res[i]);
 
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
@@ -166,8 +166,7 @@ void commProcess(void){
 
             // Positions
             for (i = 0; i < NUM_OF_SENSORS; i++) {
-                *((int16 *) &packet_data[(i*2) + 5]) = (int16)
-                (g_meas.pos[i] >> g_mem.res[i]);
+                *((int16 *) &packet_data[(i*2) + 5]) = (int16) - (g_meas.pos[i] >> g_mem.res[i]);
             }
 
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
@@ -593,7 +592,7 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string,"\r\nMEASUREMENTS INFO\r\n");
     strcat(info_string, "Sensor value:\r\n");
     for (i = 0; i < NUM_OF_SENSORS; i++) {
-        sprintf(str,"%d -> %d", i+1, (int)(g_meas.pos[i] >> c_mem.res[i]));
+        sprintf(str,"%d -> %d", i+1, (int) -(g_meas.pos[i] >> c_mem.res[i]));
         strcat(info_string, str);
         strcat(info_string, "\r\n");
     }
