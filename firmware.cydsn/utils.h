@@ -31,6 +31,8 @@ uint8 LCRChecksum(uint8 *data_array, uint8 data_length);
 
 uint8 check_enc_data(uint32*);
 
+void reset_counters(void);
+
 
 #endif
 

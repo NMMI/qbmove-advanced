@@ -38,7 +38,7 @@ void commProcess(void){
     int i;              //iterator
     uint8 rx_cmd;
     uint8 aux_checksum;
-    uint8 packet_data[16];
+    uint8 packet_data[50];
     uint8 packet_lenght;
     int32  pos, stiff;
     uint32 off_1, off_2;
@@ -67,8 +67,8 @@ void commProcess(void){
             }
 
             MOTOR_ON_OFF_Write(g_ref.onoff);
-
-            break;
+            g_count.activ++;
+        break;
 //===========================================================     CMD_SET_INPUTS
 
         case CMD_SET_INPUTS:
@@ -89,8 +89,8 @@ void commProcess(void){
                 if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) 
                     g_ref.pos[1] = c_mem.pos_lim_sup[1];
             }
-
-            break;
+            g_count.set_inputs++;
+        break;
 
 //========================================================     CMD_SET_POS_STIFF
 
@@ -116,7 +116,8 @@ void commProcess(void){
             g_ref.pos[0] = pos + stiff;
             g_ref.pos[1] = pos - stiff;
 
-            break;
+            g_count.set_pos_stiff++;
+        break;
 
 //=====================================================     CMD_GET_MEASUREMENTS
 
@@ -132,7 +133,7 @@ void commProcess(void){
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
-
+            g_count.get_meas++;
         break;
 
 //=========================================================     CMD_GET_CURRENTS
@@ -149,6 +150,7 @@ void commProcess(void){
             packet_data[5] = LCRChecksum (packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
+            g_count.get_curr++;
         break;
 
 //====================================================     CMD_GET_CURR_AND_MEAS
@@ -171,8 +173,8 @@ void commProcess(void){
 
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
-            //commWrite(packet_data, packet_lenght);
             commWrite(packet_data, packet_lenght);
+            g_count.get_curr_meas++;
         break;
 
 //=======================================================     CMD_GET_VELOCITIES
@@ -190,7 +192,7 @@ void commProcess(void){
                     LCRChecksum (packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
-
+            g_count.get_vel++;
         break;
 
 //=========================================================     CMD_GET_ACTIVATE
@@ -202,8 +204,8 @@ void commProcess(void){
             packet_data[1] = g_ref.onoff;
             packet_data[2] = LCRChecksum(packet_data,packet_lenght - 1);
             commWrite(packet_data, packet_lenght);
-
-            break;
+            g_count.get_activ++;
+        break;
 
 //============================================================     CMD_GET_INPUT
 
@@ -215,22 +217,26 @@ void commProcess(void){
             packet_data[5] = LCRChecksum(packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
-            break;
+            g_count.get_inputs++;
+        break;
 
 //=============================================================     CMD_GET_INFO
         case CMD_GET_INFO:
             infoGet(*((uint16 *) &g_rx.buffer[1]));
-            break;
+            g_count.get_info++;
+        break;
 
 //============================================================     CMD_SET_PARAM
         case CMD_SET_PARAM:
             paramSet(*((uint16 *) &g_rx.buffer[1]));
-            break;
+            g_count.set_param++;    
+        break;
 
 //============================================================     CMD_GET_PARAM
         case CMD_GET_PARAM:
             paramGet(*((uint16 *) &g_rx.buffer[1]));
-            break;
+            g_count.get_param++;
+        break;
 
 //=================================================================     CMD_PING
         case CMD_PING:
@@ -240,7 +246,8 @@ void commProcess(void){
             packet_data[1] = CMD_PING;
 
             commWrite(packet_data, packet_lenght);
-            break;
+            g_count.ping++;
+        break;
 
 //=========================================================     CMD_STORE_PARAMS
         case CMD_STORE_PARAMS:
@@ -272,7 +279,8 @@ void commProcess(void){
                 sendAcknowledgment(ACK_OK);
             else
                 sendAcknowledgment(ACK_ERROR);
-            break;
+            g_count.store_param++;    
+        break;
 
 //=================================================     CMD_STORE_DEFAULT_PARAMS
         case CMD_STORE_DEFAULT_PARAMS:
@@ -280,7 +288,8 @@ void commProcess(void){
                 sendAcknowledgment(ACK_OK);
             else
                 sendAcknowledgment(ACK_ERROR);
-            break;
+            g_count.store_default++;
+        break;
 
 //=======================================================     CMD_RESTORE_PARAMS
 
@@ -289,7 +298,8 @@ void commProcess(void){
                 sendAcknowledgment(ACK_OK);
             else
                 sendAcknowledgment(ACK_ERROR);
-            break;
+            g_count.restore++;
+        break;
 
 //=============================================================     CMD_INIT_MEM
 
@@ -298,7 +308,8 @@ void commProcess(void){
                 sendAcknowledgment(ACK_OK);
             else
                 sendAcknowledgment(ACK_ERROR);
-            break;
+            g_count.init++;
+        break;
 
 //===========================================================     CMD_BOOTLOADER
         case CMD_BOOTLOADER:
@@ -307,13 +318,48 @@ void commProcess(void){
             FTDI_ENABLE_REG_Write(0x00);
             CyDelay(1000);
             Bootloadable_Load();
-            break;
+            g_count.bootloader++;
+        break;
 
 //============================================================     CMD_CALIBRATE
         case CMD_CALIBRATE:
             calibration_flag = START;
             sendAcknowledgment(ACK_OK);
-            break;
+            g_count.calibrate++;
+        break;
+
+//==========================================================      CMD_GET_COUNTS
+        case CMD_GET_COUNTERS:
+            packet_lenght = 1 + 40 + 1;
+
+            packet_data[0] = CMD_GET_COUNTERS;   //header
+
+            *((uint16 *) &packet_data[1]) = g_count.activ;
+            *((uint16 *) &packet_data[3]) = g_count.set_inputs;
+            *((uint16 *) &packet_data[5]) = g_count.set_pos_stiff;
+            *((uint16 *) &packet_data[7]) = g_count.get_meas;
+            *((uint16 *) &packet_data[9]) = g_count.get_curr;
+            *((uint16 *) &packet_data[11]) = g_count.get_curr_meas;
+            *((uint16 *) &packet_data[13]) = g_count.get_vel;
+            *((uint16 *) &packet_data[15]) = g_count.get_activ;
+            *((uint16 *) &packet_data[17]) = g_count.get_inputs;
+            *((uint16 *) &packet_data[19]) = g_count.get_info;
+            *((uint16 *) &packet_data[21]) = g_count.set_param;
+            *((uint16 *) &packet_data[23]) = g_count.get_param;
+            *((uint16 *) &packet_data[25]) = g_count.ping;
+            *((uint16 *) &packet_data[27]) = g_count.store_param;
+            *((uint16 *) &packet_data[29]) = g_count.store_default;
+            *((uint16 *) &packet_data[31]) = g_count.restore;
+            *((uint16 *) &packet_data[33]) = g_count.init;
+            *((uint16 *) &packet_data[35]) = g_count.bootloader;
+            *((uint16 *) &packet_data[37]) = g_count.calibrate;
+            *((uint16 *) &packet_data[39]) = g_count.get_counts;
+
+            packet_data[packet_lenght - 1] = LCRChecksum (packet_data, packet_lenght - 1);
+
+            commWrite(packet_data, packet_lenght);
+            g_count.get_counts++;
+        break;
     }
 
     g_rx.ready = 0;

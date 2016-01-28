@@ -144,6 +144,7 @@ void main() {
     calibration_flag = STOP;
     reset_last_value_flag = 0;
 
+    reset_counters();
 
     //============================================================     main loop
 
