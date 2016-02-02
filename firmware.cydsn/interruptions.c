@@ -542,23 +542,23 @@ void analog_read_end(uint8 index) {
                     device.tension_valid = TRUE;
                     pwm_limit_search();
                 }
-                break;
+            break;
 
             // --- Current motor 1 ---
             case 1:
                 if (device.tension_valid)
-                    g_meas.curr[0] =  filter_i1(abs((value * 25771) >> 13));  // * 39 >> 4
+                    g_meas.curr[0] = filter_i1(abs((value * 25771) >> 13));  // * 39 >> 4
                 else
                     g_meas.curr[0] = 0;
-                break;
+            break;
 
             // --- Current motor 2 ---
             case 2:
                 if (device.tension_valid)
-                    g_meas.curr[1] =  filter_i2(abs((value * 25771) >> 13));  // * 39 >> 4
+                    g_meas.curr[1] = filter_i2(abs((value * 25771) >> 13));  // * 39 >> 4
                 else
                     g_meas.curr[1] = 0;
-                break;
+            break;
         }
     }
 }
