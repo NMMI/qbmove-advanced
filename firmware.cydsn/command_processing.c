@@ -441,11 +441,11 @@ void paramSet(uint16 param_type)
             {
                 if(i == 2) {
                     g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
-                    g_mem.m_off[i] = -g_mem.m_off[i] << g_mem.res[i];
+                    g_mem.m_off[i] = g_mem.m_off[i] << g_mem.res[i];
                 }
                 else {
                     g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
-                    g_mem.m_off[i] = g_mem.m_off[i] << g_mem.res[i];
+                    g_mem.m_off[i] = -g_mem.m_off[i] << g_mem.res[i];
                 }
                 g_meas.rot[i] = 0;
             }
