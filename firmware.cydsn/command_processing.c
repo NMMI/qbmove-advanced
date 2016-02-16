@@ -72,13 +72,30 @@ void commProcess(void){
 //===========================================================     CMD_SET_INPUTS
 
         case CMD_SET_INPUTS:
-            g_ref.pos[0] = *((int16 *) &g_rx.buffer[1]);   // motor 1
-            g_ref.pos[0] = -(g_ref.pos[0] << g_mem.res[0]);
+            if (g_mem.control_mode == CONTROL_CURRENT) {                //current control
+                g_ref.curr[0] = *((int16 *) &g_rx.buffer[1]);
+                g_ref.curr[1] = *((int16 *) &g_rx.buffer[3]);
 
-            g_ref.pos[1] = *((int16 *) &g_rx.buffer[3]);   // motor 2
-            g_ref.pos[1] = -(g_ref.pos[1] << g_mem.res[1]);
+            }
+            else {
+                if (g_mem.control_mode == CONTROL_PWM) {                //pwm control
+                    g_ref.pwm[0] = *((int16 *) &g_rx.buffer[1]);
+                    g_ref.pwm[1] = *((int16 *) &g_rx.buffer[3]);
 
-            if (c_mem.pos_lim_flag) {                      // pos limiting
+                }
+                else {                                                  //position and double loop control    
+                    g_ref.pos[0] = *((int16 *) &g_rx.buffer[1]);
+                    g_ref.pos[0] = -(g_ref.pos[0] << g_mem.res[0]);
+
+                    g_ref.pos[1] = *((int16 *) &g_rx.buffer[3]);
+                    g_ref.pos[1] = -(g_ref.pos[1] << g_mem.res[1]);
+                }
+            }
+
+            if (c_mem.pos_lim_flag && 
+                (g_mem.control_mode == CURR_AND_POS_CONTROL 
+                || g_mem.control_mode == CONTROL_ANGLE)) {                      // pos limiting
+
                 if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) 
                     g_ref.pos[0] = c_mem.pos_lim_inf[0];
                 if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) 

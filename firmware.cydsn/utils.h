@@ -18,6 +18,16 @@
 
 #include <globals.h>
 
+//--------------------------------------------------------------     DEFINITIONS
+
+#define ALPHA 8     // current filters
+#define BETA  300   // velocity filters
+
+//#define SIGN(A) (((A) > 0) ? (1) : ((((A) < 0) ? (-1) : (0))))
+
+#define SIGN(A) (((A) >= 0) ? (1) : (-1))
+
+
 //-------------------------------------------------------------     DECLARATIONS
 
 int32 filter_i1(int32 value);
@@ -30,6 +40,10 @@ int32 filter_vel_3(int32 value);
 uint8 LCRChecksum(uint8 *data_array, uint8 data_length);
 
 uint8 check_enc_data(uint32*);
+
+int8 get_pwm_sign_1(int32);
+int8 get_pwm_sign_2(int32);
+
 
 void reset_counters();
 

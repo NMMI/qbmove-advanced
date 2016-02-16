@@ -29,7 +29,7 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v5.4.1"
+#define VERSION         "QBADV v5.4.2"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
@@ -80,6 +80,8 @@
 struct st_ref {
 
     int32 pos[NUM_OF_MOTORS];       // motor reference position
+    int32 curr[NUM_OF_MOTORS];      // current reference
+    int32 pwm[NUM_OF_MOTORS];       // direct pwm reference
     uint8 onoff;                    // enable flags
 
 };
@@ -92,6 +94,7 @@ struct st_meas {
     int32 curr[NUM_OF_MOTORS];      // motor currents
     int32 rot[NUM_OF_SENSORS];      // sensor rotations
     int16 vel[NUM_OF_SENSORS];      // sensor velocity
+    int32 prev_pos[NUM_OF_SENSORS];
 
 };
 
@@ -208,6 +211,7 @@ extern uint32 timer_value;
 extern uint8 calibration_flag;
 
 extern uint8 reset_last_value_flag;
+extern int8 pwm_sign[NUM_OF_MOTORS];
 
 // -----------------------------------------------------------------------------
 

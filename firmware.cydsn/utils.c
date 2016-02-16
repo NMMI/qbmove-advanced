@@ -15,13 +15,6 @@
 #include <utils.h>
 #include <math.h>
 
-//--------------------------------------------------------------     DEFINITIONS
-
-#define ALPHA 8     // current filters
-#define BETA  300   // velocity filters
-
-#define SIGN(A) (((A) > 0) ? (1) : ((((A) < 0) ? (-1) : (0))))
-
 //==============================================================================
 //                                                               CURRENT FILTERS
 //==============================================================================
@@ -111,6 +104,44 @@ void reset_counters()
     g_count.bootloader = 0;
     g_count.calibrate = 0;
     g_count.get_counts = 0;
+}
+
+//==============================================================================
+//                                                                  PWM GET SIGN
+//==============================================================================
+
+int8 get_pwm_sign_1(int32 pwm_input)
+{
+    static int8 prev_sign;
+    if(pwm_input > 0) {
+        prev_sign = 1;
+        return 1;
+    }
+    else {
+        if(pwm_input < 0) {
+            prev_sign = -1;
+            return -1;
+        }
+        else
+            return prev_sign;
+    }
+}
+
+int8 get_pwm_sign_2(int32 pwm_input)
+{
+    static int8 prev_sign;
+    if(pwm_input > 0) {
+        prev_sign = 1;
+        return 1;
+    }
+    else {
+        if(pwm_input < 0) {
+            prev_sign = -1;
+            return -1;
+        }
+        else
+            return prev_sign;
+    }
 }
 
 //==============================================================================
