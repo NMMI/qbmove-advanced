@@ -921,9 +921,9 @@ uint8 memInit(void) {
     g_mem.k_p           =   -0.1 * 65536;
     g_mem.k_i           =   0 * 65536;
     g_mem.k_d           =   -0.8 * 65536;
-    g_mem.k_p_c         =   5 * 65536;
-    g_mem.k_i_c         =   0 * 65536;
-    g_mem.k_d_c         =   0.8 * 65536;
+    g_mem.k_p_c         =   15 * 65536;
+    g_mem.k_i_c         =   0.003 * 65536;
+    g_mem.k_d_c         =   0.01 * 65536;
     g_mem.activ         =   0;
     g_mem.input_mode    =   0;
     g_mem.control_mode  =   0;
