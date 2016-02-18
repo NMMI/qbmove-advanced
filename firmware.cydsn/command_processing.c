@@ -41,14 +41,11 @@ void commProcess(void){
     uint8 packet_data[50];
     uint8 packet_lenght;
     int32  pos, stiff;
-    uint32 off_1, off_2;
-    uint32 mult_1, mult_2;
 
     rx_cmd = g_rx.buffer[0];
 
 //==========================================================     verify checksum
-    aux_checksum = LCRChecksum(g_rx.buffer,
-        g_rx.length - 1);
+    aux_checksum = LCRChecksum(g_rx.buffer, g_rx.length - 1);
     if (!(aux_checksum == g_rx.buffer[g_rx.length-1])) {
         // wrong checksum
         g_rx.ready = 0;
@@ -65,6 +62,9 @@ void commProcess(void){
                 g_ref.pos[0] = g_meas.pos[0];
                 g_ref.pos[1] = g_meas.pos[1];
             }
+
+            if(abs(g_meas.pos[0]) > 26000 || abs(g_meas.pos[1]) > 26000 || abs(g_meas.pos[2]) > 26000)
+                g_ref.onoff = 0x00;
 
             MOTOR_ON_OFF_Write(g_ref.onoff);
             g_count.activ++;
@@ -85,10 +85,10 @@ void commProcess(void){
                 }
                 else {                                                  //position and double loop control    
                     g_ref.pos[0] = *((int16 *) &g_rx.buffer[1]);
-                    g_ref.pos[0] = -(g_ref.pos[0] << g_mem.res[0]);
+                    g_ref.pos[0] = -(g_ref.pos[0] << c_mem.res[0]);
 
                     g_ref.pos[1] = *((int16 *) &g_rx.buffer[3]);
-                    g_ref.pos[1] = -(g_ref.pos[1] << g_mem.res[1]);
+                    g_ref.pos[1] = -(g_ref.pos[1] << c_mem.res[1]);
                 }
             }
 
@@ -116,7 +116,7 @@ void commProcess(void){
             stiff = *((int16 *) &g_rx.buffer[3]);   // stiffness
 
             // position in ticks
-            pos = pos << g_mem.res[0];
+            pos = pos << c_mem.res[0];
 
             // position limit
             if (pos > (c_mem.pos_lim_sup[0] - c_mem.max_stiffness))
@@ -145,7 +145,7 @@ void commProcess(void){
             packet_data[0] = CMD_GET_MEASUREMENTS;   //header
 
             for (i = 0; i < NUM_OF_SENSORS; i++)
-                *((int16 *) &packet_data[(i*2) + 1]) = (int16) -(g_meas.pos[i] >> g_mem.res[i]);
+                *((int16 *) &packet_data[(i*2) + 1]) = (int16) -(g_meas.pos[i] >> c_mem.res[i]);
 
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
 
@@ -185,7 +185,7 @@ void commProcess(void){
 
             // Positions
             for (i = 0; i < NUM_OF_SENSORS; i++) {
-                *((int16 *) &packet_data[(i*2) + 5]) = (int16) - (g_meas.pos[i] >> g_mem.res[i]);
+                *((int16 *) &packet_data[(i*2) + 5]) = (int16) - (g_meas.pos[i] >> c_mem.res[i]);
             }
 
             packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
@@ -229,8 +229,8 @@ void commProcess(void){
         case CMD_GET_INPUTS:
             packet_lenght = 6;
 
-            *((int16 *) &packet_data[1]) = (int16) (g_ref.pos[0] >> g_mem.res[0]);
-            *((int16 *) &packet_data[3]) = (int16) (g_ref.pos[1] >> g_mem.res[1]);
+            *((int16 *) &packet_data[1]) = (int16) (g_ref.pos[0] >> c_mem.res[0]);
+            *((int16 *) &packet_data[3]) = (int16) (g_ref.pos[1] >> c_mem.res[1]);
             packet_data[5] = LCRChecksum(packet_data,packet_lenght - 1);
 
             commWrite(packet_data, packet_lenght);
@@ -268,28 +268,27 @@ void commProcess(void){
 
 //=========================================================     CMD_STORE_PARAMS
         case CMD_STORE_PARAMS:
-            if( c_mem.input_mode == INPUT_MODE_EXTERNAL )
-            {
-                off_1 = c_mem.m_off[0];
-                off_2 = c_mem.m_off[1];
-                mult_1 = c_mem.m_mult[0];
-                mult_2 = c_mem.m_mult[1];
+            // Before storing parameters, c_mem and g_mem are different.
+            // We need to adjust reference positions according to new values (g_mem)
 
-                g_ref.pos[0] /= mult_1;
-                g_ref.pos[1] /= mult_2;
+            if((c_mem.m_mult[0] != g_mem.m_mult[0]) || (c_mem.m_mult[1] != g_mem.m_mult[1])) {
+                g_ref.pos[0] /= c_mem.m_mult[0];
+                g_ref.pos[1] /= c_mem.m_mult[1];
                 g_ref.pos[0] *= g_mem.m_mult[0];
                 g_ref.pos[1] *= g_mem.m_mult[1];
+            }
 
-                g_ref.pos[0] +=  g_mem.m_off[0] - off_1;
-                g_ref.pos[1] +=  g_mem.m_off[1] - off_2;
+            if((c_mem.m_off[0] != g_mem.m_off[0]) || (c_mem.m_off[1] != g_mem.m_off[1])) {
+                g_ref.pos[0] += g_mem.m_off[0] - c_mem.m_off[0];
+                g_ref.pos[1] += g_mem.m_off[1] - c_mem.m_off[1];
+            }
 
-                if (c_mem.pos_lim_flag) {                   // position limiting
-                    if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) g_ref.pos[0] = c_mem.pos_lim_inf[0];
-                    if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) g_ref.pos[1] = c_mem.pos_lim_inf[1];
+            if (c_mem.pos_lim_flag) {                   // position limiting
+                if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) g_ref.pos[0] = c_mem.pos_lim_inf[0];
+                if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) g_ref.pos[1] = c_mem.pos_lim_inf[1];
 
-                    if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) g_ref.pos[0] = c_mem.pos_lim_sup[0];
-                    if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) g_ref.pos[1] = c_mem.pos_lim_sup[1];
-                }
+                if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) g_ref.pos[0] = c_mem.pos_lim_sup[0];
+                if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) g_ref.pos[1] = c_mem.pos_lim_sup[1];
             }
 
             if ( memStore(0) )
@@ -486,8 +485,8 @@ void paramSet(uint16 param_type)
                 g_mem.pos_lim_inf[i] = *((int16 *) &g_rx.buffer[3 + (i * 4)]);
                 g_mem.pos_lim_sup[i] = *((int16 *) &g_rx.buffer[3 + (i * 4) + 2]);
 
-                g_mem.pos_lim_inf[i] = g_mem.pos_lim_inf[i] << g_mem.res[i];
-                g_mem.pos_lim_sup[i] = g_mem.pos_lim_sup[i] << g_mem.res[i];
+                g_mem.pos_lim_inf[i] = g_mem.pos_lim_inf[i] << c_mem.res[i];
+                g_mem.pos_lim_sup[i] = g_mem.pos_lim_sup[i] << c_mem.res[i];
 
             }
             break;
@@ -636,10 +635,26 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string,"\r\n");
 
     strcat(info_string, "MOTOR INFO\r\n");
-    strcat(info_string, "Motor references: ");
+    strcat(info_string, "Motor references");
     for (i = 0; i < NUM_OF_MOTORS; i++) {
-        sprintf(str, "%d ", (int)(g_ref.pos[i] >> c_mem.res[i]));
-        strcat(info_string,str);
+        if(g_mem.control_mode == CONTROL_CURRENT) {
+            strcat(info_string," - Currents: ");
+            sprintf(str, "%d ", (int)(g_ref.curr[i]));
+            strcat(info_string,str);
+        }
+        else {
+            if(g_mem.control_mode == CONTROL_PWM) {
+                strcat(info_string," - Pwm: ");
+                sprintf(str, "%d ", (int)(g_ref.pwm[i]));
+                strcat(info_string,str);
+            }
+            else {
+                sprintf(str, " - Position: ");
+                strcat(info_string,str);
+                sprintf(str, "%d ", (int)(g_ref.pos[i] >> c_mem.res[i]));
+                strcat(info_string,str);
+            }
+        }
     }
     strcat(info_string,"\r\n");
 
@@ -789,7 +804,7 @@ void commWrite(uint8 *packet_data, uint16 packet_lenght)
     UART_RS485_PutChar(':');
     UART_RS485_PutChar(':');
     // frame - ID
-    UART_RS485_PutChar(g_mem.id);
+    UART_RS485_PutChar(c_mem.id);
     // frame - length
     UART_RS485_PutChar((uint8)packet_lenght);
     // frame - packet data

@@ -160,14 +160,13 @@ void function_scheduler(void) {
     encoder_reading(1);
     analog_read_end(0);
 
-    motor_control(0);
-    motor_control(1);
-
     analog_read_init(1);
     encoder_reading(2);
+    motor_control(0);
     analog_read_end(1);
 
     analog_read_init(2);
+    motor_control(1);
     analog_read_end(2);
 
     
