@@ -636,21 +636,27 @@ void infoPrepare(unsigned char *info_string)
 
     strcat(info_string, "MOTOR INFO\r\n");
     strcat(info_string, "Motor references");
+    
+    if(g_mem.control_mode == CONTROL_CURRENT)
+        strcat(info_string," - Currents: ");
+    else {
+        if (g_mem.control_mode == CONTROL_PWM)
+            strcat(info_string," - Pwm: ");
+        else
+            strcat(info_string," - Position: ")
+    }
+    
     for (i = 0; i < NUM_OF_MOTORS; i++) {
         if(g_mem.control_mode == CONTROL_CURRENT) {
-            strcat(info_string," - Currents: ");
             sprintf(str, "%d ", (int)(g_ref.curr[i]));
             strcat(info_string,str);
         }
         else {
             if(g_mem.control_mode == CONTROL_PWM) {
-                strcat(info_string," - Pwm: ");
                 sprintf(str, "%d ", (int)(g_ref.pwm[i]));
                 strcat(info_string,str);
             }
             else {
-                sprintf(str, " - Position: ");
-                strcat(info_string,str);
                 sprintf(str, "%d ", (int)(g_ref.pos[i] >> c_mem.res[i]));
                 strcat(info_string,str);
             }
