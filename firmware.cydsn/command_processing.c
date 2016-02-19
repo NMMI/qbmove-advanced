@@ -643,7 +643,7 @@ void infoPrepare(unsigned char *info_string)
         if (g_mem.control_mode == CONTROL_PWM)
             strcat(info_string," - Pwm: ");
         else
-            strcat(info_string," - Position: ")
+            strcat(info_string," - Position: ");
     }
     
     for (i = 0; i < NUM_OF_MOTORS; i++) {
