@@ -29,7 +29,7 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v5.4.3"
+#define VERSION         "QBADV v5.5.0"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
@@ -138,9 +138,10 @@ struct st_mem {
     int32   pos_lim_sup[NUM_OF_MOTORS]; // Superior position limit for motors       4 (8)
 
     uint16  max_stiffness;              // Max stiffness value obtained
-                                        // during calibration                       2       19
+                                        // during calibration                       2       
+    uint8   deflection_control;         // Deflection control flag                  1       20
 
-                                                                                        //  77
+                                                                                        //  28
 };
 
 //=================================================     device related variables

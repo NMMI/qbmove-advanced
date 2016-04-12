@@ -196,6 +196,7 @@ void motor_control(uint8 index) {
     static int32 pwm_input;
     static int32 pos_error;
     static int32 curr_error;
+    static int32 defl_input[NUM_OF_MOTORS];
 
     static uint8 direction;
 
@@ -228,10 +229,20 @@ void motor_control(uint8 index) {
     switch(c_mem.control_mode) {
         case CONTROL_ANGLE:
             // position error
-            pos_error = g_ref.pos[index] - g_meas.pos[index];
 
-            // error sum for integral
-            pos_error_sum[index] += pos_error;
+            if(g_mem.deflection_control){
+				//for deflection control the shaft position must be summed to reference
+				//but the qbmove_adv has the shaft position with the opposite sign in relation
+				//to the motors one.
+                defl_input[index] = -(g_ref.pos[index] - g_meas.pos[2]);
+                pos_error = defl_input[index] - g_meas.pos[index];
+                pos_error_sum[index] += pos_error;
+            }
+            else {
+                pos_error = g_ref.pos[index] - g_meas.pos[index];
+                // error sum for integral
+                pos_error_sum[index] += pos_error;
+            }
 
             //anti wind-up
             if (pos_error_sum[index] > POS_INTEGRAL_SAT_LIMIT) {
@@ -284,7 +295,17 @@ void motor_control(uint8 index) {
             break;
 
         case CURR_AND_POS_CONTROL:
-            pos_error = g_ref.pos[index] - g_meas.pos[index];
+
+            if(g_mem.deflection_control) {
+                defl_input[index] = -(g_ref.pos[index] - g_meas.pos[2]);
+                pos_error = defl_input[index] - g_meas.pos[index];
+                pos_error_sum[index] += pos_error;
+            }
+            else {
+                pos_error = g_ref.pos[index] - g_meas.pos[index];
+                pos_error_sum[index] += pos_error;
+            }
+            
 
             // ------ position PID control -----
 
