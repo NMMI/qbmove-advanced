@@ -29,7 +29,7 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v5.5.0"
+#define VERSION         "QBADV v5.5.1"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
@@ -123,6 +123,14 @@ struct st_mem {
     int32   k_p_c;                      // Proportional constant current            4
     int32   k_i_c;                      // Derivative constant current              4
     int32   k_d_c;                      // Integrative constant current             4
+
+    int32   k_p_dl;                     // Proportional constant double loop        4
+    int32   k_i_dl;                     // Derivative constant double loop          4
+    int32   k_d_dl;                     // Integrative constant double loop         4
+
+    int32   k_p_c_dl;                   // Prop. constant current double loop       4
+    int32   k_i_c_dl;                   // Derivative constant current double loop  4
+    int32   k_d_c_dl;                   // Integrative constant current double loop 4
 
     int16   current_limit;              // Limit for absorbed current               2
 

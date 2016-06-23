@@ -306,26 +306,33 @@ void motor_control(uint8 index) {
                 pos_error_sum[index] += pos_error;
             }
             
+            // Saturate position error sum
+            if (pos_error_sum[index] > POS_INTEGRAL_SAT_LIMIT)
+                pos_error_sum[index] = POS_INTEGRAL_SAT_LIMIT;
+            else { 
+                if (pos_error_sum[index] < -POS_INTEGRAL_SAT_LIMIT)
+                    pos_error_sum[index] = -POS_INTEGRAL_SAT_LIMIT;
+            }
 
             // ------ position PID control -----
 
             curr_ref = 0;
 
             // Proportional
-            if (c_mem.k_p != 0) {
+            if (c_mem.k_p_dl != 0) {
                 if ((pos_error > 131072) || (pos_error < -131072))
-                    curr_ref += (int32)(c_mem.k_p * (pos_error >> 8)) >> 8;
+                    curr_ref += (int32)(c_mem.k_p_dl * (pos_error >> 8)) >> 8;
                 else
-                    curr_ref += (int32)(c_mem.k_p * pos_error) >> 16;
+                    curr_ref += (int32)(c_mem.k_p_dl * pos_error) >> 16;
             }
 
             // Integral
-            if (c_mem.k_i != 0)
-                curr_ref += (int32)(c_mem.k_i * pos_error_sum[index]) >> 16;
+            if (c_mem.k_i_dl != 0)
+                curr_ref += (int32)(c_mem.k_i_dl * pos_error_sum[index]) >> 16;
 
             // Derivative
-            if (c_mem.k_d != 0)
-                curr_ref += (int32)(c_mem.k_d * (prev_pos[index] - g_meas.pos[index])) >> 16;
+            if (c_mem.k_d_dl != 0)
+                curr_ref += (int32)(c_mem.k_d_dl * (prev_pos[index] - g_meas.pos[index])) >> 16;
 
             // motor direction depends on curr_ref
             switch(index) {
@@ -347,57 +354,44 @@ void motor_control(uint8 index) {
                     break;
             }
 
-            // current ref must be positive
-            curr_ref = abs(curr_ref);
-
             // saturate max current
             if (curr_ref > c_mem.current_limit)
                 curr_ref = c_mem.current_limit;
+            else {
+                if(curr_ref < -c_mem.current_limit)
+                   curr_ref = -c_mem.current_limit; 
+            }
+
 
             // current error
             curr_error = curr_ref - g_meas.curr[index];
 
-
-            // ----- current PID control -----
-
-            pwm_input = 0;
-
-            // Proportional
-            if (c_mem.k_p_c != 0)
-                pwm_input += (int32)(c_mem.k_p_c * curr_error) >> 16;
-
-            // Integral
-            if (c_mem.k_i_c != 0)
-                pwm_input += (int32)(c_mem.k_i_c * curr_error_sum[index]) >> 16;
-
-            // Derivative
-            if (c_mem.k_d_c != 0)
-                pwm_input += (int32)(c_mem.k_d_c * (prev_curr[index] - g_meas.curr[index])) >> 16;
-
-            // pwm_input saturation
-            if (pwm_input < 0) {
-                pwm_input = 0;
-            } else if (pwm_input > PWM_MAX_VALUE) {
-                pwm_input = PWM_MAX_VALUE;
-            }
-
-            // update error sum for both errors
-            pos_error_sum[index] += pos_error;
+            // calculate current sum for integral control
             curr_error_sum[index] += curr_error;
 
-            // error_sum saturation
-            if (pos_error_sum[index] > POS_INTEGRAL_SAT_LIMIT) {
-                pos_error_sum[index] = POS_INTEGRAL_SAT_LIMIT;
-            } else if (pos_error_sum[index] < -POS_INTEGRAL_SAT_LIMIT) {
-                pos_error_sum[index] = -POS_INTEGRAL_SAT_LIMIT;
-            }
-
+            // Integral control saturation
             if (curr_error_sum[index] > CURR_INTEGRAL_SAT_LIMIT) {
                 curr_error_sum[index] = CURR_INTEGRAL_SAT_LIMIT;
             } else if (curr_error_sum[index] < -CURR_INTEGRAL_SAT_LIMIT) {
                 curr_error_sum[index] = -CURR_INTEGRAL_SAT_LIMIT;
             }
 
+            // ----- current PID control -----
+
+            pwm_input = 0;
+
+            // Proportional
+            if (c_mem.k_p_c_dl != 0)
+                pwm_input += (int32)(c_mem.k_p_c_dl * curr_error) >> 16;
+
+            // Integral
+            if (c_mem.k_i_c_dl != 0)
+                pwm_input += (int32)(c_mem.k_i_c_dl * curr_error_sum[index]) >> 16;
+
+            // Derivative
+            if (c_mem.k_d_c_dl != 0)
+                pwm_input += (int32)(c_mem.k_d_c_dl * (prev_curr[index] - g_meas.curr[index])) >> 16;
+            
             // Update position
             prev_pos[index] = g_meas.pos[index];
 
