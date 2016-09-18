@@ -29,11 +29,12 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v5.5.2"
+#define VERSION         "QBADV v6.1.0"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
 #define NUM_OF_ANALOG_INPUTS    3
+#define NUM_OF_PARAMS           13
 
 //==============================================================================
 //                                                                       CONTROL
@@ -63,6 +64,23 @@
 #define DIV_INIT_VALUE          1
 
 //==============================================================================
+//                                                                           DMA
+//==============================================================================
+    
+#define DMA_BYTES_PER_BURST 2
+#define DMA_REQUEST_PER_BURST 1
+#define DMA_SRC_BASE (CYDEV_PERIPH_BASE)
+#define DMA_DST_BASE (CYDEV_SRAM_BASE)
+    
+//==============================================================================
+//                                                                     INTERRUPT
+//==============================================================================
+#define    WAIT_START   0
+#define    WAIT_ID      1
+#define    WAIT_LENGTH  2
+#define    RECEIVE      3
+#define    UNLOAD       4
+//==============================================================================
 //                                                                         OTHER
 //==============================================================================
 
@@ -70,6 +88,8 @@
 #define TRUE            1
 
 #define DEFAULT_EEPROM_DISPLACEMENT 8 // in pages
+
+#define MAX_WATCHDOG_TIMER 250          // num * 2 [cs]
 
 //==============================================================================
 //                                                        structures definitions
@@ -92,7 +112,7 @@ struct st_meas {
 
     int32 pos[NUM_OF_SENSORS];      // sensor position
     int32 curr[NUM_OF_MOTORS];      // motor currents
-    int32 rot[NUM_OF_SENSORS];      // sensor rotations
+    int8 rot[NUM_OF_SENSORS];      // sensor rotations
     int16 vel[NUM_OF_SENSORS];      // sensor velocity
     int32 prev_pos[NUM_OF_SENSORS];
 
@@ -124,13 +144,13 @@ struct st_mem {
     int32   k_i_c;                      // Derivative constant current              4
     int32   k_d_c;                      // Integrative constant current             4
 
-    int32   k_p_dl;                     // Proportional constant double loop        4
-    int32   k_i_dl;                     // Derivative constant double loop          4
-    int32   k_d_dl;                     // Integrative constant double loop         4
+    int32   k_p_dl;                     // Proportional double loop constant        4
+    int32   k_i_dl;                     // Derivative double loop constant          4
+    int32   k_d_dl;                     // Integrative double loop constant         4
 
-    int32   k_p_c_dl;                   // Prop. constant current double loop       4
-    int32   k_i_c_dl;                   // Derivative constant current double loop  4
-    int32   k_d_c_dl;                   // Integrative constant current double loop 4
+    int32   k_p_c_dl;                   // Prop. double loop constant current       4
+    int32   k_i_c_dl;                   // Derivative double loop constant current  4
+    int32   k_d_c_dl;                   // Integrative double loopconstant current  4
 
     int16   current_limit;              // Limit for absorbed current               2
 
@@ -147,9 +167,11 @@ struct st_mem {
 
     uint16  max_stiffness;              // Max stiffness value obtained
                                         // during calibration                       2       
-    uint8   deflection_control;         // Deflection control flag                  1       20
-
-                                                                                        //  28
+    uint8   baud_rate;                  // Baud Rate Setted                         1
+    uint8   watchdog_period;            // Watchdog period setted, 255 = disable    1
+    int32   max_step_neg;               // Maximum velocity for negative inputs     4       
+    int32   max_step_pos;               // Maximum velocity for positive inputs     4
+                                                                                    //  UPDATE
 };
 
 //=================================================     device related variables
@@ -200,26 +222,39 @@ enum calibration_status {
     CONTINUE_2  = 3,
     PAUSE_1     = 4,
     PAUSE_2     = 5
-
 };
-
-
 
 //====================================      external global variables definition
 
 
-extern struct st_ref    g_ref;          // motor variables
-extern struct st_meas   g_meas;         // measurements
-extern struct st_data   g_rx;           // income data
-extern struct st_mem    g_mem, c_mem;   // memory
-extern struct st_dev    device;         // device related variables
-extern struct st_count  g_count;        // counters
+extern struct st_ref    g_ref, g_refNew, g_refOld;  // motor variables
+extern struct st_meas   g_meas, g_measOld;          // measurements
+extern struct st_data   g_rx;                       // income data
+extern struct st_mem    g_mem, c_mem;               // memory
+extern struct st_count  g_count;                    // counters
 
 extern uint32 timer_value;
+extern uint32 timer_value0;
+
+// Device Data
+
+extern int32   dev_tension;                         // Power supply tension
+extern uint8   dev_pwm_limit;
 
 extern uint8 calibration_flag;
 
-extern uint8 reset_last_value_flag;
+// Bit Flag
+
+extern CYBIT reset_last_value_flag;
+extern CYBIT tension_valid;                         // tension validation bit
+extern CYBIT interrupt_flag;                        // interrupt flag enabler
+extern CYBIT watchdog_flag;                         // watchdog flag enabler
+
+// DMA Buffer
+
+extern int16 ADC_buf[3];
+
+// PWM Sign Value
 extern int8 pwm_sign[NUM_OF_MOTORS];
 
 // -----------------------------------------------------------------------------

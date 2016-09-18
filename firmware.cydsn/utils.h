@@ -39,11 +39,10 @@ int32 filter_vel_3(int32 value);
 
 uint8 LCRChecksum(uint8 *data_array, uint8 data_length);
 
-uint8 check_enc_data(uint32*);
+CYBIT check_enc_data(const uint32*);
 
 int8 get_pwm_sign_1(int32);
 int8 get_pwm_sign_2(int32);
-
 
 void reset_counters();
 
