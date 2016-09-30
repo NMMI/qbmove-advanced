@@ -778,6 +778,8 @@ void analog_read_end() {
     
     if (dev_tension > 0){
         
+        POWER_ON_LED_REG_Write(1);
+        
         // Set PWM depends on tension
         pwm_limit_search();
         
@@ -808,6 +810,9 @@ void analog_read_end() {
         tension_valid = TRUE; 
     }
     else {
+        
+        POWER_ON_LED_REG_Write(0);
+        
         g_meas.curr[0] = 0;
         g_meas.curr[1] = 0;
     }
