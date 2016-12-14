@@ -681,11 +681,11 @@ void infoPrepare(unsigned char *info_string)
             }
             else {
                 if(g_mem.control_mode == DEFL_CURRENT_CONTROL || g_mem.control_mode == DEFLECTION_CONTROL) {
-                    sprintf(str, "%d ", (int) (g_refOld.pos[i] + g_meas.pos[2]) >> c_mem.res[i]);
+                    sprintf(str, "%d ", (int)(g_refOld.pos[i] + g_meas.pos[2]) >> c_mem.res[i]);
                     strcat(info_string, str);
                 }
-                else {
-                    sprintf(str, "%d ", (int)(g_refOld.pos[i] >> c_mem.res[i]));
+                else { //Position control
+                    sprintf(str, "%d ", -(int)(g_refOld.pos[i] >> c_mem.res[i])); //Sign is inverted because references are taken with inverted sign
                     strcat(info_string,str);
                 }
             }
@@ -1193,8 +1193,8 @@ void cmd_set_pos_stiff(){
     stiff = (int32)(((float) c_mem.max_stiffness / 32768.0) * stiff);
 
     // Store pos/stiff rule
-    g_refNew.pos[0] = pos + stiff;
-    g_refNew.pos[1] = pos - stiff;
+    g_refNew.pos[0] = -(pos + stiff);
+    g_refNew.pos[1] = -(pos - stiff);
 
     g_count.set_pos_stiff++;
 
