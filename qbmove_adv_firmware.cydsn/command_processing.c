@@ -1272,8 +1272,8 @@ void cmd_get_curr_and_meas(){
         
     // Calculate Checksum and send message to UART 
         
-    packet_data[7] = LCRChecksum (packet_data, 11);
-    commWrite(packet_data, 11);
+    packet_data[11] = LCRChecksum (packet_data, 11);
+    commWrite(packet_data, 12);
 
     g_count.get_curr_meas++;
 
