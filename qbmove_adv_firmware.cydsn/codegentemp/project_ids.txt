@@ -1,0 +1,6 @@
+C:\Users\MattiaCP\Documents\GITHUB\qbmove-advanced\qbmove_adv_firmware.cydsn\qbmove_adv_firmware.cyprj|fa59fb60-8b9d-4b72-8911-efd942b6a7fb
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|276f20a9-ec25-4a8a-83d1-526976055020
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyReferenceLibrary\CyReferenceLibrary.cylib\CyReferenceLibrary.cyprj|4434faf7-2600-448e-a3f1-782bebd7d700
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|c333ec10-b66b-4e0e-a58e-3fcc6f858782
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|daaf2953-ab70-40ad-90e8-afa9d9a10e61
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|415d445d-66be-497a-898f-29e39e1fbdbb
