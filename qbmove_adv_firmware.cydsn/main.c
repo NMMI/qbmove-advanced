@@ -158,6 +158,7 @@ int main() {
 
     //====================================     initializations - clean variables
 
+    RESET_COUNTERS_Write(0x00);    
     CyDelay(10);                                        // Wait for encoders to have a valid value
 
     //---------------------------------------------------  Initialize referiment structure
@@ -176,16 +177,12 @@ int main() {
     
     reset_counters();                                   // Reset commands set counters
     
-    RESET_COUNTERS_Write(0x00);
-    
     //------------------------------------------------- Initialize packge on receive from RS485
     g_rx.length = 0;
     g_rx.ready  = 0;
-
-
+    
     MOTOR_ON_OFF_Write(g_ref.onoff);                    // Activating motors
 
-    
     dev_pwm_limit = 0;                                  // Init PWM limit
     tension_valid = FALSE;                              // Init tension_valid BIT
 
