@@ -875,7 +875,7 @@ void encoder_reading(const uint8 idx)
         return;
 
     if(reset_last_value_flag) {
-        for (jj = NUM_OF_SENSORS; jj--;)
+        for (jj = (NUM_OF_SENSORS - 1); jj < 0; jj--)
             last_value_encoder[jj] = 0;
         reset_last_value_flag = 0;
     } 
@@ -996,13 +996,6 @@ void calibration()
 
     switch(calibration_flag) {
         case START:
-            ISR_RS485_RX_Disable();
-
-            // save old PID values
-            old_k_p = c_mem.k_p;
-            old_k_i = c_mem.k_i;
-            old_k_d = c_mem.k_d;
-
             // goto to zero position
             g_refNew.pos[0] = 0;
             g_refNew.pos[1] = 0;
@@ -1022,11 +1015,6 @@ void calibration()
             if (pause_counter == 10) {
                 pause_counter = 0;
 
-                // set new temp values for PID parameters
-                c_mem.k_p = 0.1 * 65536;
-                c_mem.k_i = 0;
-                c_mem.k_d = 0.3 * 65536;
-
                 calibration_flag = CONTINUE_1;
             }
             break;
@@ -1041,11 +1029,6 @@ void calibration()
                 // save current value as MAX_STIFFNESS
                 g_mem.max_stiffness = g_ref.pos[0];
 
-                // reset old values for PID parameters
-                c_mem.k_p = old_k_p;
-                c_mem.k_i = old_k_i;
-                c_mem.k_d = old_k_d;
-
                 // go back to zero position
                 g_refNew.pos[0] = 0;
                 g_refNew.pos[1] = 0;
@@ -1059,14 +1042,17 @@ void calibration()
             pause_counter++;
 
             if (pause_counter == 10) {
-                pause_counter =0;
+                pause_counter = 0;
 
                 calibration_flag = CONTINUE_2;
             }
             break;
 
         case CONTINUE_2:
+            
+            ISR_RS485_RX_Disable();
             // Deactivate motors
+            
             if (!(g_refNew.onoff & 0x03)) {
                 MOTOR_ON_OFF_Write(0x00);
             }

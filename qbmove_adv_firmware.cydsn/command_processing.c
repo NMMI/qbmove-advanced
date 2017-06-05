@@ -1149,13 +1149,15 @@ void cmd_activate(){
         g_refNew.onoff = 0x00;
     
     // Activate/Disactivate motors
-    MOTOR_ON_OFF_Write(g_refNew.onoff);
+    if(!g_refNew.onoff)
+        MOTOR_ON_OFF_Write(0x00);
+    else
+        MOTOR_ON_OFF_Write(0x03);
 
     g_count.activ++;
 }
 
 void cmd_set_inputs(){
-    
 
     if (g_mem.control_mode == CONTROL_CURRENT) {                //current control
         g_refNew.curr[0] = *((int16 *) &g_rx.buffer[1]);
