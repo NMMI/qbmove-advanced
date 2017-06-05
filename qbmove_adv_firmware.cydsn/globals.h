@@ -57,7 +57,7 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v6.1.4"
+#define VERSION         "QBADV v6.1.5"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
