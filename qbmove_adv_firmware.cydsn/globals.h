@@ -57,12 +57,12 @@
 //                                                                        DEVICE
 //==============================================================================
 
-#define VERSION         "QBADV v6.1.5"
+#define VERSION         "QBADV v6.1.6"
 
 #define NUM_OF_MOTORS           2
 #define NUM_OF_SENSORS          3
 #define NUM_OF_ANALOG_INPUTS    3
-#define NUM_OF_PARAMS           13
+#define NUM_OF_PARAMS           14
 
 //==============================================================================
 //                                                                       CONTROL
@@ -117,7 +117,7 @@
 
 #define DEFAULT_EEPROM_DISPLACEMENT 8 // in pages
 
-#define MAX_WATCHDOG_TIMER 250          // num * 2 [cs]
+#define MAX_WATCHDOG_TIMER 250        // num * 2 [cs]
 
 //==============================================================================
 //                                                        structures definitions
@@ -199,6 +199,9 @@ struct st_mem {
     uint8   watchdog_period;            // Watchdog period setted, 255 = disable    1
     int32   max_step_neg;               // Maximum velocity for negative inputs     4       
     int32   max_step_pos;               // Maximum velocity for positive inputs     4
+    
+    uint8   max_pwm_rate;               // Maximum pwm rate used to drive the motor 
+                                        // between steps of control
                                                                                     //  UPDATE
 };
 

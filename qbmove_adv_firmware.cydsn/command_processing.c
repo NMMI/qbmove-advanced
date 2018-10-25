@@ -284,8 +284,8 @@ void setZeros()
 void get_param_list(uint16 index)
 {
     //Package to be sent variables
-    static uint8 packet_data[1151] = "";
-    uint16 packet_lenght = 1151;
+    static uint8 packet_data[1201] = "";
+    uint16 packet_lenght = 1201;
 
     //Auxiliary variables
     uint16 CYDATA i;
@@ -306,6 +306,7 @@ void get_param_list(uint16 index)
     char pos_lim_str[29]        = "11 - Pos. limits [inf, sup]:";
     char max_step_str[27]       = "12 - Max steps [neg, pos]:";
     char curr_limit_str[20]     = "13 - Current limit:";
+    char max_pwm_rate_str[19]   = "14 - Max PWM rate:";
 
     //Parameters menus
     char input_mode_menu[52] = "0 -> Usb\n1 -> Shaft's position controls the motors\n";
@@ -323,6 +324,7 @@ void get_param_list(uint16 index)
 
     uint8 CYDATA pos_lim_str_len = strlen(pos_lim_str);
     uint8 CYDATA curr_limit_str_len = strlen(curr_limit_str);
+    uint8 CYDATA max_pwm_rate_str_len = strlen(max_pwm_rate_str);
 
     uint8 CYDATA input_mode_menu_len = strlen(input_mode_menu);
     uint8 CYDATA control_mode_menu_len = strlen(control_mode_menu);
@@ -527,16 +529,24 @@ void get_param_list(uint16 index)
             for(i = curr_limit_str_len; i != 0; i--)
                 packet_data[606 + curr_limit_str_len - i] = curr_limit_str[curr_limit_str_len - i];
 
+            /*------------RATE LIMITER-----------*/
+            
+            packet_data[652] = TYPE_UINT8;
+            packet_data[653] = 1;
+            packet_data[654] = c_mem.max_pwm_rate;
+            for(i = max_pwm_rate_str_len; i != 0; i--)
+                packet_data[655 + max_pwm_rate_str_len - i] = max_pwm_rate_str[max_pwm_rate_str_len - i];
+             
             /*------------PARAMETERS MENU-----------*/
 
             for(i = input_mode_menu_len; i != 0; i--)
-                packet_data[652 + input_mode_menu_len - i] = input_mode_menu[input_mode_menu_len - i];
+                packet_data[702 + input_mode_menu_len - i] = input_mode_menu[input_mode_menu_len - i];
 
             for(i = control_mode_menu_len; i != 0; i--)
-                packet_data[802 + control_mode_menu_len - i] = control_mode_menu[control_mode_menu_len - i];
+                packet_data[852 + control_mode_menu_len - i] = control_mode_menu[control_mode_menu_len - i];
 
             for(i = yes_no_menu_len; i!= 0; i--)
-                packet_data[952 + yes_no_menu_len - i] = yes_no_menu[yes_no_menu_len - i];
+                packet_data[1002 + yes_no_menu_len - i] = yes_no_menu[yes_no_menu_len - i];
 
 
             packet_data[packet_lenght - 1] = LCRChecksum(packet_data,packet_lenght - 1);
@@ -646,6 +656,11 @@ void get_param_list(uint16 index)
         case 13:        //Current limit - int16
             g_mem.current_limit = *((int16*) &g_rx.buffer[3]);
         break;
+            
+//===================================================     set_max_pwm_rate
+        case 14:        //Max pwm rate - uint8
+            g_mem.max_pwm_rate = *((uint8*) &g_rx.buffer[3]);
+        break;    
     }
 }
 
@@ -873,6 +888,10 @@ void infoPrepare(unsigned char *info_string)
     strcat(info_string,"\r\n");
 
     sprintf(str, "Current limit: %d", (int)g_mem.current_limit);
+    strcat(info_string, str);
+    strcat(info_string,"\r\n");
+    
+    sprintf(str, "Max pwm rate: %d", (int)g_mem.max_pwm_rate);
     strcat(info_string, str);
     strcat(info_string,"\r\n");
 

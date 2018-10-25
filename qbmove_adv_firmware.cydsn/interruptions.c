@@ -360,6 +360,7 @@ void motor_control(const uint8 idx) {
     static int32 pos_error_sum[NUM_OF_MOTORS];
     static int32 curr_error_sum[NUM_OF_MOTORS];
     static int32 prev_curr_err[NUM_OF_MOTORS];
+    static int32 prev_pwm = 0;
 
     // check index value
     if (index >= NUM_OF_MOTORS)
@@ -718,6 +719,23 @@ void motor_control(const uint8 idx) {
     if(pwm_input < -PWM_MAX_VALUE) 
         pwm_input = -PWM_MAX_VALUE;
     
+    if((pwm_input-prev_pwm) > c_mem.max_pwm_rate){ //Case movement from 0 to 15000 Gradual start no braking
+        if(pwm_input == PWM_MAX_VALUE) //Movement starting
+            pwm_input = prev_pwm + c_mem.max_pwm_rate;
+    }
+
+    if((pwm_input-prev_pwm) < -c_mem.max_pwm_rate){ //Case movement from 15000 to 0 Gradual start no braking
+        if(pwm_input == -PWM_MAX_VALUE) //Movement starting in the opposite direction
+            pwm_input = prev_pwm - c_mem.max_pwm_rate;
+    }
+    
+    if(pwm_input >  PWM_MAX_VALUE) 
+        pwm_input =  PWM_MAX_VALUE;
+    if(pwm_input < -PWM_MAX_VALUE) 
+        pwm_input = -PWM_MAX_VALUE;
+    
+    prev_pwm = pwm_input;
+    
     if (interrupt_flag){
         interrupt_flag = FALSE;
         interrupt_manager();
@@ -988,10 +1006,6 @@ void encoder_reading(const uint8 idx)
 
 void calibration()
 {
-    static int32 old_k_p;
-    static int32 old_k_i;
-    static int32 old_k_d;
-
     static uint8 pause_counter = 0;
 
     switch(calibration_flag) {
